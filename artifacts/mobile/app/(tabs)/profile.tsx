@@ -42,14 +42,11 @@ export default function ProfileScreen() {
           <Ionicons name="person" size={32} color={C.primaryFg} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.userName}>{user?.name || user?.phone || 'My Account'}</Text>
+          <Text style={styles.userName}>{user?.name ?? 'Guest'}</Text>
           <View style={styles.phoneRow}>
             <Ionicons name="call-outline" size={13} color={C.mutedFg} />
             <Text style={styles.phone}>{user?.phone ?? ''}</Text>
           </View>
-          {!!user?.name && !!user?.phone && (
-            <Text style={styles.phoneSecondary}>{user.phone}</Text>
-          )}
           <Text style={styles.role}>{user?.role ?? ''} Account</Text>
         </View>
       </View>
@@ -92,8 +89,7 @@ const styles = StyleSheet.create({
   avatar:   { width: 64, height: 64, borderRadius: RADIUS.full, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   userName: { color: C.fg, fontSize: 17, fontFamily: F.bold },
   phoneRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  phone:    { color: C.mutedFg, fontSize: 12, fontFamily: F.medium },
-  phoneSecondary: { color: C.mutedFg, fontSize: 11, fontFamily: F.regular, marginTop: 1 },
+  phone:    { color: C.mutedFg, fontSize: 12, fontFamily: F.regular },
   role:     { color: C.accent, fontSize: 10, fontFamily: F.semiBold, marginTop: 4, textTransform: 'capitalize' },
   menuList: { gap: 8, marginBottom: 24 },
   menuItem: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: C.card, borderRadius: RADIUS.xl, padding: 16, borderWidth: 1, borderColor: C.border },

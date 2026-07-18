@@ -1,0 +1,3 @@
+- [GoPay Expo env vars](gopay-expo-env.md) — EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY must be Replit secrets with that exact prefix; other approaches (app.config.js extra, .env file, $ALIAS trick) all failed for web preview.
+- [GoPay Expo migration](gopay-expo-migration.md) — full React Native Expo Router app at artifacts/mobile; all screens written, Supabase direct (no Express), navigation via router.push/replace.
+- [GoPay PIN auth password format](gopay-auth-pin-format.md) — original app stored Supabase auth password as `pin_XXXX_secure`, not the raw PIN; signIn tries 7 candidates and self-repairs.

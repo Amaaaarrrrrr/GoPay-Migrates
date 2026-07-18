@@ -1,0 +1,220 @@
+We have already built the mobile application. The next task is not to redesign it, but to make it match the attached web application exactly in terms of design system, navigation, and user experience.
+
+Primary Objective
+
+Use the attached web application as the single source of truth for the mobile app.
+
+The mobile app should mirror the web app's:
+
+UI design
+Color palette
+Typography
+Icons
+Component styling
+Dashboard layout
+Navigation structure
+Menu hierarchy
+Page organization
+Overall user experience
+
+This is a UI/UX alignment task, not a feature rewrite.
+
+Design Requirements
+1. Design System
+
+Extract the design system from the web app and apply it consistently throughout the mobile app.
+
+Match:
+
+Primary colors
+Secondary colors
+Accent colors
+Background colors
+Card styles
+Shadows
+Border radius
+Buttons
+Inputs
+Badges
+Chips
+Status colors
+Spacing
+Font sizes
+Font weights
+
+Everything should look like it belongs to the same product.
+
+2. Dashboard
+
+The mobile dashboard should follow the same structure as the web dashboard.
+
+Match:
+
+Greeting section
+Balance cards
+Quick actions
+Statistics
+Recent activity
+Promotional banners
+Cards
+Widgets
+Layout hierarchy
+Component order
+
+Adapt only where necessary for a mobile screen.
+
+3. Navigation
+
+The navigation should match the web application.
+
+Replicate:
+
+Dashboard
+Wallet
+Payments
+Transfers
+Transactions
+Cards
+Profile
+Settings
+Notifications
+Support
+Any additional menu items
+
+If the web app uses a sidebar, convert it into the most appropriate mobile navigation pattern:
+
+Bottom Tabs
+Drawer
+Nested Stack Navigation
+
+Maintain the same information architecture.
+
+4. Menu Hierarchy
+
+The mobile menu should contain the exact same sections as the web application.
+
+Do not rename pages unless necessary for mobile.
+
+Keep:
+
+Same ordering
+Same grouping
+Same icons
+Same labels
+Same navigation flow
+5. Screens
+
+Every existing mobile screen should visually resemble its equivalent web page.
+
+Match:
+
+Headers
+Cards
+Buttons
+Tables (converted into mobile-friendly lists)
+Charts
+Empty states
+Loading states
+Error states
+6. Components
+
+Reuse existing mobile components where possible.
+
+If a component differs from the web version:
+
+Update styling
+Update spacing
+Update colors
+Update typography
+Update icons
+Update animations
+
+Do not create duplicate components.
+
+7. Responsive Adaptation
+
+This is not a direct copy of the desktop layout.
+
+Instead:
+
+Preserve the same visual language.
+Preserve the same hierarchy.
+Preserve the same interactions.
+Adapt layouts appropriately for mobile.
+8. Colors
+
+Extract every color token from the web app.
+
+Use identical:
+
+Primary
+Secondary
+Success
+Warning
+Error
+Background
+Surface
+Border
+Text
+Disabled
+
+Replace any colors currently used in the mobile app that don't match.
+
+9. Icons
+
+Match the web app's icon set.
+
+Use the same icon family where possible.
+
+Icons should represent the same actions and appear in the same locations.
+
+10. Animations
+
+Replicate the web app's feel by matching:
+
+Page transitions
+Button feedback
+Card interactions
+Loading animations
+Navigation transitions
+
+Use native mobile animations where appropriate.
+
+11. Typography
+
+Match:
+
+Font family
+Heading sizes
+Body text
+Labels
+Captions
+Font weights
+Line spacing
+12. Maintain Existing Functionality
+
+Do not break existing functionality.
+
+Only update:
+
+UI
+Layout
+Navigation
+Styling
+
+Existing business logic, APIs, authentication, Supabase integration, and backend functionality should continue working.
+
+13. Final Verification
+
+Before completing the task, compare every major screen with the web application and ensure:
+
+Matching color scheme
+Matching dashboard structure
+Matching navigation hierarchy
+Matching menu items
+Matching spacing
+Matching typography
+Matching component styling
+Consistent branding
+
+The goal is that the mobile application feels like the official mobile version of the attached web application, with identical branding, navigation, and user experience while remaining fully optimized for Android and iOS.

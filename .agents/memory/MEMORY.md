@@ -1,0 +1,1 @@
+- [GoPay mobile build](gopay-mobile.md) — full Expo app at artifacts/mobile; 28 screens; supabase lazy-init guards missing env vars.

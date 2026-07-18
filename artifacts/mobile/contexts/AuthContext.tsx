@@ -57,24 +57,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /** Loads profile + role, sets state, and returns the resolved User. */
   async function loadProfile(userId: string): Promise<User> {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, name, phone, email')
-      .eq('id', userId)
-      .single();
-
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Select both `name` and `full_name` — different Supabase projects use either
+    const [{ data }, { data: roleData }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('id, name, full_name, phone, email')
+        .eq('id', userId)
+        .single(),
+      supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle(),
+    ]);
 
     const resolved: User = {
-      id: data?.id ?? userId,
-      name: data?.name ?? 'User',
+      id:    data?.id    ?? userId,
+      name:  data?.full_name || data?.name || '',   // prefer full_name, fall back to name
       phone: data?.phone ?? '',
       email: data?.email ?? '',
-      role: (roleData?.role ?? 'passenger') as UserRole,
+      role:  (roleData?.role ?? 'passenger') as UserRole,
     };
     setUser(resolved);
     return resolved;

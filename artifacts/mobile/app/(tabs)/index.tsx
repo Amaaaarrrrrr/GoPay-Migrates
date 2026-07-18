@@ -76,7 +76,7 @@ export default function HomeScreen() {
     return () => clearInterval(t);
   }, []);
 
-  const firstName = user?.name?.split(' ')[0] ?? 'Commuter';
+  const firstName = user?.name?.split(' ')[0] || user?.phone || 'Commuter';
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
@@ -162,7 +162,8 @@ export default function HomeScreen() {
                     </Text>
                 }
               </View>
-              <Text style={styles.cardSub}>{user?.name} • {user?.phone}</Text>
+              {!!user?.name && <Text style={styles.cardName}>{user.name}</Text>}
+              <Text style={styles.cardSub}>{user?.phone ?? ''}</Text>
             </View>
           </Pressable>
         </View>
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
   drawerUser:   { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: C.border },
   drawerAvatar: { width: 48, height: 48, borderRadius: RADIUS.full, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   drawerName:   { color: C.fg, fontSize: 14, fontFamily: F.semiBold },
-  drawerPhone:  { color: C.mutedFg, fontSize: 11, fontFamily: F.regular, marginTop: 1 },
+  drawerPhone:  { color: C.mutedFg, fontSize: 12, fontFamily: F.medium, marginTop: 2 },
   drawerRole:   { color: C.accent, fontSize: 10, fontFamily: F.semiBold, marginTop: 2, textTransform: 'capitalize' },
   drawerItem:   { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 13 },
   drawerItemLabel: { color: C.fg, fontSize: 13, fontFamily: F.medium },
@@ -262,6 +263,7 @@ const styles = StyleSheet.create({
   activeDot: { width: 8, height: 8, borderRadius: RADIUS.full, backgroundColor: C.success },
   cardBalance: { marginBottom: 8, minHeight: 44, justifyContent: 'center' },
   balanceAmt: { color: C.primaryFg, fontSize: 36, fontFamily: F.extraBold, letterSpacing: -0.5 },
+  cardName:  { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontFamily: F.semiBold, marginBottom: 2 },
   cardSub:   { color: 'rgba(255,255,255,0.5)', fontSize: 11, fontFamily: F.regular },
   actionsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 20 },
   actionBtn:  { flex: 1, backgroundColor: C.card, borderRadius: RADIUS.xl, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: C.border },

@@ -113,8 +113,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (!error) {
         if (password !== rawPin) {
-          supabase.auth.updateUser({ password: rawPin }).catch(() => {});
-          supabase.from('profiles').update({ pin: rawPin }).eq('id', profile.id).catch(() => {});
+          // Fire-and-forget self-repair: use void + IIFE so errors never surface to the caller
+          void (async () => { try { await supabase.auth.updateUser({ password: rawPin }); } catch {} })();
+          void (async () => { try { await supabase.from('profiles').update({ pin: rawPin }).eq('id', profile.id); } catch {} })();
         }
         return await loadProfile(profile.id);
       }

@@ -3,18 +3,20 @@ import type { Route, Vehicle, Transaction } from '@/types';
 
 // ─── Wallet ───────────────────────────────────────────────────────────────────
 
-export async function getWallet(): Promise<{ balance: number; id: string }> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+export async function getWallet(userIdHint?: string): Promise<{ balance: number; id: string; currency: string }> {
+  // Prefer the caller-supplied id (already known from auth context) to avoid
+  // an extra network round-trip to supabase.auth.getUser().
+  const uid = userIdHint ?? (await supabase.auth.getUser()).data.user?.id;
+  if (!uid) throw new Error('Not authenticated');
 
   const { data, error } = await supabase
     .from('wallet_accounts')
-    .select('id, balance')
-    .eq('user_id', user.id)
+    .select('id, balance, currency')
+    .eq('user_id', uid)
     .maybeSingle();
 
   if (error) throw error;
-  return { id: data?.id ?? '', balance: data?.balance ?? 0 };
+  return { id: data?.id ?? '', balance: data?.balance ?? 0, currency: data?.currency ?? 'KES' };
 }
 
 export async function topUpWallet(amount: number, pin: string): Promise<{ reference: string }> {

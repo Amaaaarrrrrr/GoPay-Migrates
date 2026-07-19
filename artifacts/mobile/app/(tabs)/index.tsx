@@ -67,7 +67,7 @@ export default function HomeScreen() {
   const loadBalance = useCallback(async () => {
     if (!user?.id) { setWalletLoading(false); return; }
     setWalletLoading(true);
-    try { const w = await api.getWallet(); setBalance(w.balance); }
+    try { const w = await api.getWallet(user.id); setBalance(w.balance); }
     catch { setBalance(null); }
     finally { setWalletLoading(false); }
   }, [user?.id]);
@@ -112,7 +112,7 @@ export default function HomeScreen() {
             ))}
           </ScrollView>
           <View style={[styles.drawerFooter, { paddingBottom: insets.bottom + 16 }]}>
-            <Pressable style={styles.signOutBtn} onPress={async () => { closeMenu(); await logout(); router.replace('/' as any); }}>
+            <Pressable style={styles.signOutBtn} onPress={async () => { closeMenu(); await logout(); router.replace('/login' as any); }}>
               <Ionicons name="log-out-outline" size={18} color={C.destructive} />
               <Text style={styles.signOutText}>Sign Out</Text>
             </Pressable>

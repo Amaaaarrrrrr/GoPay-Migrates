@@ -1,0 +1,131 @@
+Fix Authentication, Wallet Fetching, and Logout Flow
+
+There are still issues with the authentication flow and dashboard.
+
+1. Wallet Data Is Not Being Fetched
+
+The dashboard loads, but it is not retrieving the authenticated user's wallet information.
+
+The following values should be fetched from the backend immediately after login:
+
+Wallet balance
+Currency
+Wallet/account ID
+Account number
+Wallet status
+Any linked cards
+Recent transactions
+
+The balance should never remain:
+
+KES —
+
+unless the API explicitly returns no wallet.
+
+Use the authenticated user's ID to retrieve the correct wallet.
+
+Verify the mobile app is calling the same wallet endpoints as the web application.
+
+2. User Profile Is Not Being Loaded
+
+The dashboard is still displaying placeholder information.
+
+Instead of:
+
+Good morning
+User 👋
+
+or
+
+Commuter 👋
+
+display the authenticated user's actual name from the backend.
+
+Also populate:
+
+Avatar
+Email
+Phone number (if available)
+Profile details
+
+Do not use placeholder values.
+
+3. Logout Is Broken
+
+Currently, when the user presses Logout, the app redirects to the Commuter Dashboard.
+
+This is incorrect.
+
+The correct flow is:
+
+User taps Logout
+↓
+
+Clear authentication session
+
+↓
+
+Clear cached user data
+
+↓
+
+Clear wallet data
+
+↓
+
+Reset navigation stack
+
+↓
+
+Navigate to Login screen
+
+After logout:
+
+The user must not remain authenticated.
+The back button must not return to any authenticated screen.
+The app should require a fresh login.
+4. Verify User Roles
+
+If the application supports multiple user roles (Commuter, Driver, Admin, etc.):
+
+Load the authenticated user's role from the backend.
+Navigate to the correct dashboard for that role.
+Never default to the Commuter dashboard unless the authenticated user is actually a commuter.
+Remove any hardcoded role values such as "Commuter" or default dashboard routing.
+5. Fix Authentication State
+
+Ensure that:
+
+The authenticated session is restored correctly after login.
+User profile data is fetched immediately.
+Wallet data is fetched immediately.
+Dashboard statistics are fetched immediately.
+The UI updates automatically once the data is available.
+
+Do not require the user to refresh the app.
+
+6. Audit the Entire Authentication Flow
+
+Review and fix:
+
+Login
+Session restoration
+Dashboard initialization
+User profile fetching
+Wallet fetching
+Role detection
+Navigation
+Logout
+Cache invalidation
+
+There should be a single, consistent authentication flow shared across the application.
+
+Expected Result
+
+After logging in:
+
+✅ The authenticated user's real name appears.
+✅ The wallet balance loads correctly.
+✅ The correct dashboard is shown based on the user's role.
+✅ Recent transactions and account data are displayed.
+✅ Logging out completely clears the session and always returns the user to the Login screen without redirecting to the Commuter dashboard.

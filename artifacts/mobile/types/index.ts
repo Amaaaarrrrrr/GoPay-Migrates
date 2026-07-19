@@ -6,6 +6,7 @@ export interface User {
   phone: string;
   email: string;
   role: UserRole;
+  avatarUrl?: string | null;
 }
 
 export interface Wallet {

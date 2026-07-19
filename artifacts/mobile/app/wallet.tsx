@@ -25,8 +25,9 @@ export default function WalletScreen() {
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
 
   const loadData = useCallback(async () => {
+    if (!user?.id) { setBalanceLoading(false); setTxLoading(false); return; }
     try {
-      const w = await api.getWallet(); setBalance(w.balance);
+      const w = await api.getWallet(user.id); setBalance(w.balance);
     } catch { setBalance(null); }
     finally { setBalanceLoading(false); }
 

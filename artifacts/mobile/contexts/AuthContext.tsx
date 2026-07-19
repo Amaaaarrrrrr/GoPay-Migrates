@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function loadProfile(userId: string): Promise<User> {
     const { data } = await supabase
       .from('profiles')
-      .select('id, name, phone, email')
+      .select('id, name, full_name, phone, email, avatar_url')
       .eq('id', userId)
       .single();
 
@@ -71,10 +71,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const resolved: User = {
       id: data?.id ?? userId,
-      name: data?.name ?? 'User',
+      name: data?.name ?? data?.full_name ?? '',
       phone: data?.phone ?? '',
       email: data?.email ?? '',
       role: (roleData?.role ?? 'passenger') as UserRole,
+      avatarUrl: data?.avatar_url ?? null,
     };
     setUser(resolved);
     return resolved;
@@ -161,8 +162,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function logout(): Promise<void> {
-    await supabase.auth.signOut();
-    setUser(null);
+    setUser(null);                          // clear immediately so UI reacts at once
+    await supabase.auth.signOut().catch(() => {});
   }
 
   return (

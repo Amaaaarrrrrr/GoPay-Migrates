@@ -23,7 +23,7 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     await logout();
-    router.replace('/' as any);
+    router.replace('/login' as any);
   };
 
   return (
@@ -42,11 +42,19 @@ export default function ProfileScreen() {
           <Ionicons name="person" size={32} color={C.primaryFg} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.userName}>{user?.name ?? 'Guest'}</Text>
-          <View style={styles.phoneRow}>
-            <Ionicons name="call-outline" size={13} color={C.mutedFg} />
-            <Text style={styles.phone}>{user?.phone ?? ''}</Text>
-          </View>
+          <Text style={styles.userName}>{user?.name || user?.email?.split('@')[0] || 'Guest'}</Text>
+          {!!user?.email && (
+            <View style={styles.phoneRow}>
+              <Ionicons name="mail-outline" size={13} color={C.mutedFg} />
+              <Text style={styles.phone}>{user.email}</Text>
+            </View>
+          )}
+          {!!user?.phone && (
+            <View style={styles.phoneRow}>
+              <Ionicons name="call-outline" size={13} color={C.mutedFg} />
+              <Text style={styles.phone}>{user.phone}</Text>
+            </View>
+          )}
           <Text style={styles.role}>{user?.role ?? ''} Account</Text>
         </View>
       </View>

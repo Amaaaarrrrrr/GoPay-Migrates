@@ -15,7 +15,7 @@ const BG_IMAGE = 'https://images.unsplash.com/photo-1611824904551-3af6a3d5d6d7?w
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const [rawPhone, setRawPhone] = useState('');
-  const [agreed, setAgreed] = useState(false);
+  const [agreed, setAgreed] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

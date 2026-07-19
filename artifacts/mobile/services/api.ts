@@ -11,12 +11,13 @@ export async function getWallet(userIdHint?: string): Promise<{ balance: number;
 
   const { data, error } = await supabase
     .from('wallet_accounts')
-    .select('id, balance, currency')
+    .select('id, balance')
     .eq('user_id', uid)
     .maybeSingle();
 
   if (error) throw error;
-  return { id: data?.id ?? '', balance: data?.balance ?? 0, currency: data?.currency ?? 'KES' };
+  // currency is always KES — the column does not exist in the schema
+  return { id: data?.id ?? '', balance: data?.balance ?? 0, currency: 'KES' };
 }
 
 export async function topUpWallet(amount: number, pin: string): Promise<{ reference: string }> {
@@ -140,12 +141,28 @@ const MOCK_ROUTES: Route[] = [
   { id: '8', from: 'CBD', to: 'Rongai', fare: 110, sacco: 'Rongai Route', duration: '80 min', distance: '38 km' },
 ];
 
+/** Normalise a raw DB row to our Route shape, handling alternate column names. */
+function normaliseRoute(row: Record<string, any>): Route {
+  return {
+    id:       String(row.id ?? ''),
+    from:     row.from ?? row.origin ?? row.pickup_location ?? row.start ?? row.source ?? '',
+    to:       row.to   ?? row.destination ?? row.drop_location ?? row.end ?? row.dest ?? '',
+    fare:     Number(row.fare ?? row.price ?? row.cost ?? 0),
+    sacco:    row.sacco ?? row.sacco_name ?? row.operator ?? '',
+    duration: row.duration ?? row.estimated_duration ?? row.travel_time ?? undefined,
+    distance: row.distance ?? row.km ?? undefined,
+  };
+}
+
 export async function getRoutes(): Promise<Route[]> {
   try {
     const { data, error } = await supabase.from('routes').select('*').limit(50);
-    if (error || !data?.length) return MOCK_ROUTES;
-    return data as Route[];
-  } catch {
+    if (error) { console.warn('[api] getRoutes error:', error.message); return MOCK_ROUTES; }
+    if (!data?.length) return MOCK_ROUTES;
+    const mapped = data.map(normaliseRoute).filter(r => r.from || r.to);
+    return mapped.length ? mapped : MOCK_ROUTES;
+  } catch (e: any) {
+    console.warn('[api] getRoutes exception:', e?.message);
     return MOCK_ROUTES;
   }
 }
@@ -153,7 +170,8 @@ export async function getRoutes(): Promise<Route[]> {
 export async function getRouteById(id: string): Promise<Route | null> {
   try {
     const { data } = await supabase.from('routes').select('*').eq('id', id).single();
-    return (data as Route) ?? MOCK_ROUTES.find(r => r.id === id) ?? null;
+    if (data) return normaliseRoute(data as Record<string, any>);
+    return MOCK_ROUTES.find(r => r.id === id) ?? null;
   } catch {
     return MOCK_ROUTES.find(r => r.id === id) ?? null;
   }

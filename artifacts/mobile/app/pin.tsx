@@ -57,7 +57,7 @@ export default function PinScreen() {
           </View>
 
           <Text style={styles.heading}>Enter Your PIN</Text>
-          <Text style={styles.hint}>Your PIN is 2 letters + 2 numbers (e.g., AB12)</Text>
+          <Text style={styles.hint}>Enter your 4-character PIN</Text>
 
           <View style={styles.inputWrap}>
             <TextInput
@@ -69,7 +69,7 @@ export default function PinScreen() {
                 setPin(v.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase());
               }}
               secureTextEntry={!showPin}
-              placeholder="e.g. AB12"
+              placeholder="••••"
               placeholderTextColor={C.mutedFg}
               maxLength={4}
               autoCapitalize="characters"

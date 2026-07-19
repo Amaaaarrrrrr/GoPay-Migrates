@@ -1,0 +1,121 @@
+Fix Wallet, Database Queries, and Route Data
+
+There are still critical backend integration issues that need to be fixed.
+
+1. Fix the Wallet Database Query
+
+The wallet screen displays this error:
+
+column wallet_accounts.currency does not exist
+
+This indicates that the mobile app is querying a column that does not exist in the database.
+
+Please:
+
+Inspect the actual Supabase database schema.
+Compare the mobile app queries with the web application.
+Update the mobile app to use the correct table and column names.
+Do not assume columns exist.
+Remove any hardcoded field names that don't match the production database.
+
+If the currency is fixed (e.g. KES), don't query a non-existent currency column. Instead, either:
+
+use the correct column if one exists, or
+use the application's configured default currency.
+2. Fetch the Wallet Correctly
+
+After login, automatically retrieve:
+
+Wallet balance
+Wallet ID
+Account number
+Wallet status
+Currency
+Recent transactions
+Available balance
+
+The balance should never remain:
+
+KES —
+
+unless the user genuinely has no wallet.
+
+If the wallet does not exist:
+
+Create it automatically (if that is the intended backend behaviour), or
+Display a proper empty-state message instead of a database error.
+3. Use the Same Backend Logic as the Web App
+
+The web application already works correctly.
+
+Do not create new API logic.
+
+Reuse:
+
+the same Supabase queries,
+the same repositories/services,
+the same SQL,
+the same RPCs,
+the same authentication flow,
+the same wallet retrieval logic.
+
+The mobile app should behave exactly like the web application.
+
+4. Nairobi Routes Are Not Loading Correctly
+
+The Routes screen is displaying incomplete information.
+
+Currently it only shows:
+
+empty route names
+arrows
+fare
+
+Each route should display complete information from the backend, including:
+
+Route name
+Pickup location
+Destination
+SACCO name
+Fare
+Vehicle type (if available)
+Estimated travel time
+Status/availability
+
+Do not use placeholder or dummy data.
+
+5. Audit All Database Queries
+
+Review every Supabase query used by the mobile app.
+
+Verify that:
+
+every table exists,
+every column exists,
+foreign key relationships are correct,
+joins are correct,
+RLS policies allow authenticated users to read their own data,
+query results are correctly mapped to the UI.
+
+Remove any references to non-existent database columns.
+
+6. Error Handling
+
+Database errors should never be shown directly to users.
+
+Instead:
+
+Log technical errors for debugging.
+Display a user-friendly error message.
+Retry where appropriate.
+Prevent raw SQL or Supabase errors from appearing in the UI.
+Expected Result
+
+After these fixes:
+
+✅ Wallet balance loads correctly.
+✅ No wallet_accounts.currency database errors.
+✅ Wallet information matches the web application.
+✅ Routes display complete data from the backend.
+✅ All Supabase queries align with the actual database schema.
+✅ The mobile app uses the same backend logic as the web application without hardcoded or placeholder values.

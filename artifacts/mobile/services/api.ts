@@ -16,29 +16,58 @@ export async function getWallet(userIdHint?: string): Promise<{ balance: number;
     .maybeSingle();
 
   if (error) throw error;
+
+  // Auto-create wallet if one doesn't exist for this user
+  if (!data) {
+    const { data: created, error: createErr } = await supabase
+      .from('wallet_accounts')
+      .insert({ user_id: uid, balance: 0 })
+      .select('id, balance')
+      .single();
+    if (createErr) {
+      console.warn('[api] getWallet: could not auto-create wallet:', createErr.message);
+      return { id: '', balance: 0, currency: 'KES' };
+    }
+    return { id: created.id, balance: created.balance ?? 0, currency: 'KES' };
+  }
+
   // currency is always KES — the column does not exist in the schema
-  return { id: data?.id ?? '', balance: data?.balance ?? 0, currency: 'KES' };
+  return { id: data.id, balance: data.balance ?? 0, currency: 'KES' };
 }
 
-export async function topUpWallet(amount: number, pin: string): Promise<{ reference: string }> {
+export async function topUpWallet(amount: number, _pin?: string): Promise<{ reference: string }> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
   const reference = 'TOP' + Date.now().toString(36).toUpperCase();
-  const { error } = await supabase.rpc('process_top_up', {
+
+  // Try RPC first; fall back to direct update if RPC is not deployed
+  const { error: rpcErr } = await supabase.rpc('process_top_up', {
     p_user_id: user.id,
     p_amount: amount,
     p_reference: reference,
-  }).single();
+  });
 
-  // If RPC doesn't exist, update directly
-  if (error) {
-    const wallet = await getWallet();
+  if (rpcErr) {
+    // Fallback: fetch current balance, add amount, write new total
+    const wallet = await getWallet(user.id);
+    const newBalance = (wallet.balance ?? 0) + amount;
     const { error: updateErr } = await supabase
       .from('wallet_accounts')
-      .update({ balance: supabase.rpc as any })
+      .update({ balance: newBalance })
       .eq('id', wallet.id);
     if (updateErr) throw updateErr;
+
+    // Record the top-up transaction
+    await supabase.from('transactions').insert({
+      user_id: user.id,
+      amount,
+      type: 'top_up',
+      transaction_type: 'topup',
+      description: `Wallet top-up via M-Pesa`,
+      reference,
+      status: 'success',
+    });
   }
 
   return { reference };
@@ -124,7 +153,75 @@ export async function walletTransfer(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
+  // Verify PIN against profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('pin')
+    .eq('id', user.id)
+    .single();
+
+  const storedPin = profile?.pin ?? '';
+  const rawPin = pin.toUpperCase().trim();
+  const pinOk =
+    rawPin === storedPin.toUpperCase() ||
+    `pin_${rawPin}_secure` === storedPin ||
+    rawPin === storedPin;
+  if (!pinOk) throw new Error('Incorrect PIN. Please try again.');
+
+  // Check sender balance
+  const senderWallet = await getWallet(user.id);
+  if (senderWallet.balance < amount) throw new Error('Insufficient balance.');
+
+  // Find recipient by phone
+  const variants = [toPhone, toPhone.replace('+', ''), toPhone.replace('+254', '0')];
+  const { data: recipientProfile } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('phone', variants)
+    .limit(1)
+    .maybeSingle();
+
   const reference = 'TRF' + Date.now().toString(36).toUpperCase();
+
+  // Deduct from sender
+  const { error: debitErr } = await supabase
+    .from('wallet_accounts')
+    .update({ balance: senderWallet.balance - amount })
+    .eq('id', senderWallet.id);
+  if (debitErr) throw debitErr;
+
+  // Record sender transaction
+  await supabase.from('transactions').insert({
+    user_id: user.id,
+    amount: -amount,
+    type: 'transfer',
+    transaction_type: 'transfer',
+    description: `Money sent to ${toPhone}`,
+    reference,
+    status: 'success',
+  });
+
+  // Credit recipient if found
+  if (recipientProfile?.id) {
+    const recipientWallet = await getWallet(recipientProfile.id);
+    if (recipientWallet.id) {
+      await supabase
+        .from('wallet_accounts')
+        .update({ balance: recipientWallet.balance + amount })
+        .eq('id', recipientWallet.id);
+
+      await supabase.from('transactions').insert({
+        user_id: recipientProfile.id,
+        amount,
+        type: 'transfer',
+        transaction_type: 'transfer',
+        description: `Money received`,
+        reference,
+        status: 'success',
+      });
+    }
+  }
+
   return { reference };
 }
 

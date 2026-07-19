@@ -1,0 +1,144 @@
+Fix Wallet, User Profile, and Post-Login Data Synchronization
+
+The authentication succeeds, but the application is not correctly loading the authenticated user's data after login.
+
+Please perform a complete audit of the authentication, profile, and wallet flow.
+
+1. Fix Wallet Loading
+
+The wallet still shows:
+
+KES —
+no transactions
+no balance
+
+Investigate why.
+
+Verify that:
+
+a wallet record exists for every authenticated user
+wallet_accounts.user_id matches the authenticated Supabase Auth user ID
+Row Level Security policies allow the authenticated user to read and update their own wallet
+the mobile app is querying the correct wallet table
+the mobile app is using the authenticated user's ID instead of a placeholder or cached ID
+
+If a wallet does not exist for a newly registered user, automatically create one instead of allowing the app to fail.
+
+2. Fix Wallet Transactions
+
+Inspect the wallet service implementation.
+
+I found incorrect update logic in the fallback implementation.
+
+Do not update the wallet using invalid values.
+
+Replace the fallback implementation with proper logic that:
+
+retrieves the current balance
+adds or subtracts the correct amount
+writes the new numeric balance back to the database
+records the transaction correctly
+refreshes the wallet immediately after completion
+
+Ensure that:
+
+Top Up works
+Pay Fare works
+Send Money works
+Wallet balance refreshes immediately after every transaction
+3. Fix User Profile Loading
+
+After login the dashboard still shows placeholder values such as:
+
+User
+Commuter
+
+Instead, display the authenticated user's actual information.
+
+Retrieve and display:
+
+Full name
+Display name
+Phone number
+Email
+Avatar
+
+If name is empty, use full_name.
+
+If both are empty, retrieve the user's metadata from Supabase Auth.
+
+If the profile table is missing data, synchronize it automatically after login.
+
+4. Display the Full Name Everywhere
+
+After login, use the authenticated user's real name on:
+
+Dashboard
+Wallet
+Profile
+Drawer
+Settings
+Greeting banner
+
+Never display generic values like:
+
+User
+Passenger
+Commuter
+
+unless absolutely no user data exists.
+
+5. Display the Phone Number
+
+The authenticated user's phone number should appear wherever required.
+
+Verify that:
+
+the phone is stored in the profiles table
+it matches the authenticated user
+it is loaded into the AuthContext
+it updates automatically after login
+6. Create a Proper Post-Login Initialization
+
+Immediately after authentication:
+
+Restore the authenticated session.
+Load the user's profile.
+Load the user's role.
+Load the user's wallet.
+Create a wallet automatically if one doesn't exist (if supported by the backend).
+Load recent transactions.
+Load account statistics.
+Update all screens with the fetched data.
+
+The user should never have to restart or refresh the app to see their information.
+
+7. Match the Web Application
+
+The web application already handles this correctly.
+
+Reuse the same:
+
+Supabase queries
+services
+RPCs
+authentication flow
+profile loading
+wallet loading
+transaction logic
+
+Do not create a separate implementation for mobile.
+
+The mobile app should behave identically to the web app.
+
+Expected Result
+
+After logging in:
+
+✅ The user's full name is displayed.
+✅ The phone number is displayed.
+✅ The wallet balance loads correctly.
+✅ Recent transactions appear.
+✅ Wallet operations (Top Up, Pay Fare, Send Money) update the balance immediately.
+✅ No placeholder values (User, Commuter, KES —) remain when valid backend data exists.
+✅ The mobile app uses the authenticated user's live data consistently across all screens.

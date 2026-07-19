@@ -46,17 +46,12 @@ export default function WalletScreen() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleTopUp = async (amt: number) => {
+    if (!user?.id) { setTopUpError('Not authenticated.'); return; }
     setTopUpLoading(true); setTopUpError(''); setTopUpSuccess('');
     try {
-      // Credit the wallet directly in Supabase and refetch the live balance
-      const wallet = await api.getWallet();
-      const { error: updateErr } = await supabase
-        .from('wallet_accounts')
-        .update({ balance: wallet.balance + amt })
-        .eq('id', wallet.id);
-      if (updateErr) throw updateErr;
-      const refreshed = await api.getWallet();
-      setBalance(refreshed.balance);
+      await api.topUpWallet(amt);
+      // Refetch balance and transactions immediately
+      await loadData();
       setTopUpSuccess(`KES ${amt.toLocaleString()} added to your wallet!`);
       setTopUpAmt('');
       setTimeout(() => setTopUpSuccess(''), 4000);

@@ -57,23 +57,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /** Loads profile + role, sets state, and returns the resolved User. */
   async function loadProfile(userId: string): Promise<User> {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, name, full_name, phone, email, avatar_url')
-      .eq('id', userId)
-      .single();
+    const [{ data }, { data: roleData }, { data: { user: authUser } }] = await Promise.all([
+      supabase.from('profiles').select('id, name, full_name, phone, email, avatar_url').eq('id', userId).single(),
+      supabase.from('user_roles').select('role').eq('user_id', userId).maybeSingle(),
+      supabase.auth.getUser(),
+    ]);
 
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Name: profile.name → profile.full_name → auth metadata → ''
+    const authMeta = authUser?.user_metadata ?? {};
+    const name =
+      data?.name?.trim() ||
+      data?.full_name?.trim() ||
+      authMeta.full_name?.trim() ||
+      authMeta.name?.trim() ||
+      '';
+
+    // Email: profile → auth
+    const email = data?.email?.trim() || authUser?.email?.trim() || '';
+
+    // Phone: profile only
+    const phone = data?.phone?.trim() || '';
+
+    // If profile is missing name/phone, sync from auth metadata silently
+    if (data && (!data.name || !data.phone)) {
+      void supabase.from('profiles').upsert({
+        id: userId,
+        name: name || undefined,
+        email: email || undefined,
+        phone: phone || undefined,
+      }).then(() => {});
+    }
 
     const resolved: User = {
       id: data?.id ?? userId,
-      name: data?.name ?? data?.full_name ?? '',
-      phone: data?.phone ?? '',
-      email: data?.email ?? '',
+      name,
+      phone,
+      email,
       role: (roleData?.role ?? 'passenger') as UserRole,
       avatarUrl: data?.avatar_url ?? null,
     };

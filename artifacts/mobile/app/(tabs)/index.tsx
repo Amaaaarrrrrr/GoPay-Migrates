@@ -78,7 +78,7 @@ export default function HomeScreen() {
     return () => clearInterval(t);
   }, []);
 
-  const firstName = user?.name?.split(' ')[0] ?? 'Commuter';
+  const firstName = user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'Commuter';
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
@@ -98,7 +98,7 @@ export default function HomeScreen() {
               <Ionicons name="person" size={22} color={C.primaryFg} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.drawerName}>{user?.name ?? 'Guest'}</Text>
+              <Text style={styles.drawerName}>{user?.name || user?.email?.split('@')[0] || 'Guest'}</Text>
               <Text style={styles.drawerPhone}>{user?.phone ?? ''}</Text>
               <Text style={styles.drawerRole}>{user?.role}</Text>
             </View>

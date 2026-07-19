@@ -65,10 +65,12 @@ export default function HomeScreen() {
   };
 
   const loadBalance = useCallback(async () => {
+    if (!user?.id) { setWalletLoading(false); return; }
+    setWalletLoading(true);
     try { const w = await api.getWallet(); setBalance(w.balance); }
     catch { setBalance(null); }
     finally { setWalletLoading(false); }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => { loadBalance(); }, [loadBalance]);
   useEffect(() => {

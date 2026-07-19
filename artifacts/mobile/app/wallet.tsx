@@ -47,9 +47,15 @@ export default function WalletScreen() {
   const handleTopUp = async (amt: number) => {
     setTopUpLoading(true); setTopUpError(''); setTopUpSuccess('');
     try {
-      // Simulate top-up (real M-Pesa integration would go here)
-      await new Promise(r => setTimeout(r, 1200));
-      setBalance(b => (b ?? 0) + amt);
+      // Credit the wallet directly in Supabase and refetch the live balance
+      const wallet = await api.getWallet();
+      const { error: updateErr } = await supabase
+        .from('wallet_accounts')
+        .update({ balance: wallet.balance + amt })
+        .eq('id', wallet.id);
+      if (updateErr) throw updateErr;
+      const refreshed = await api.getWallet();
+      setBalance(refreshed.balance);
       setTopUpSuccess(`KES ${amt.toLocaleString()} added to your wallet!`);
       setTopUpAmt('');
       setTimeout(() => setTopUpSuccess(''), 4000);

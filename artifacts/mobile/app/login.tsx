@@ -35,10 +35,7 @@ export default function LoginScreen() {
           .limit(1)
           .maybeSingle();
 
-      const timeout = new Promise<never>((_, rej) =>
-        setTimeout(() => rej(new Error('Lookup timeout')), 8000)
-      );
-      let { data: profile, error: profileErr } = await Promise.race([runQuery(), timeout]) as Awaited<ReturnType<typeof runQuery>>;
+      let { data: profile, error: profileErr } = await runQuery();
 
       if (profileErr && (profileErr as any).code === 'PGRST303') {
         await supabase.auth.signOut().catch(() => {});

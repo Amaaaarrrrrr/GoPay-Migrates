@@ -1,0 +1,49 @@
+Fix Dashboard Data Fetching
+
+The authentication is working, but after logging in the dashboard is not fetching the logged-in user's information. This needs to be fixed.
+
+Expected Behaviour
+
+After a successful login, the dashboard should automatically load and display the authenticated user's data, just like the web application.
+
+The following should be fetched and displayed:
+
+User's full name
+Profile photo/avatar (if available)
+Email
+Wallet balance
+Account number
+Transaction history
+Recent activity
+Notifications
+Cards
+Any other dashboard statistics available from the backend
+What to Check
+Verify the authenticated user session is being retrieved correctly.
+Ensure the access token/session is being passed with every authenticated API request.
+Confirm the correct user ID is being used when requesting dashboard data.
+Check that the mobile app is calling the same backend endpoints as the web application.
+Ensure Supabase/Auth state is restored after login and app refresh.
+Verify that React Query/Context/Redux (whichever is used) updates the UI after the data is fetched.
+Fix any incorrect field mappings between the API response and the UI components.
+Handle loading, empty, and error states gracefully.
+Dashboard Behaviour
+
+When the user logs in:
+
+Authenticate successfully.
+Retrieve the current authenticated session.
+Fetch the user's profile.
+Fetch wallet information.
+Fetch dashboard statistics.
+Fetch recent transactions.
+Update the UI immediately without requiring a refresh or re-login.
+Important
+
+Do not use hardcoded or mock data.
+
+The dashboard must display real data from the backend/database for the currently authenticated user.
+
+If the web app already implements this correctly, reuse the same API endpoints, authentication flow, and data models so the mobile app behaves identically.
+
+Finally, verify that every screen displaying user information (Dashboard, Profile, Wallet, Transactions, Settings, etc.) is using the authenticated user's live data rather than placeholder values or static content.
